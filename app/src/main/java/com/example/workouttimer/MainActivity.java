@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                         tv_song_artist.setText(track.artist.name);
                     }
                 });
+
     }
 
 
