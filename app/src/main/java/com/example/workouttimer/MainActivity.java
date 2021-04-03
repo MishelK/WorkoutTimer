@@ -1,6 +1,8 @@
 package com.example.workouttimer;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.workouttimer.utilities.Config;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -13,8 +15,6 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String CLIENT_ID = "008364546c024db1818a96724881f3e7";
-    private static final String REDIRECT_URI = "workouttimer://callback";
     private SpotifyAppRemote mSpotifyAppRemote;
 
     TextView tv_song_artist, tv_song_name;
@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
         // Connecting to spotify
         // Setting the connection parameters
         ConnectionParams connectionParams =
-                new ConnectionParams.Builder(CLIENT_ID)
-                        .setRedirectUri(REDIRECT_URI)
+                new ConnectionParams.Builder(Config.CLIENT_ID)
+                        .setRedirectUri(Config.REDIRECT_URI)
                         .showAuthView(true)
                         .build();
 
