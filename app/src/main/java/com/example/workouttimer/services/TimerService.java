@@ -4,17 +4,18 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.example.workouttimer.utilities.Config;
 
 public class TimerService extends Service {
 
-    private static final long TIMER_INTERVAL = 1000;
-    private static final long INITIAL_TIMER = 60000;
-
     private CountDownTimer countDownTimer;
-    private long timerDuration = INITIAL_TIMER; //Used upon initial start of timer
-    private long timerTimerLeft = INITIAL_TIMER; // Used for pausing and resuming a timer
+    private long timerDuration = Config.INITIAL_TIMER; //Used upon initial start of timer
+    private long timerTimeLeft = Config.INITIAL_TIMER; // Used for pausing and resuming a timer
     private boolean isReset = false; // Used for determining if startTimer is initial or a resume
     private boolean isRunning = false; // Used for determining if timer is running
 
@@ -31,20 +32,24 @@ public class TimerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) { // Called from startService()
-        String command = intent.getStringExtra("command");
+        String command = intent.getStringExtra(Config.TIMER_COMMAND);
         if (command != null) {
             switch (command) {
-                case "start":
+                case Config.TIMER_START:
                     startTimer();
+                    Log.i("workouttimer", "Start Timer");
                     break;
-                case "stop":
+                case Config.TIMER_STOP:
                     stopTimer();
+                    Log.i("workouttimer", "Stop Timer");
                     break;
-                case "reset":
+                case Config.TIMER_RESET:
                     resetTimer();
+                    Log.i("workouttimer", "Reset Timer");
                     break;
-                case "set_time":
-                    setTime(intent.getLongExtra("duration",INITIAL_TIMER));
+                case Config.TIMER_SET_TIME:
+                    setTime(intent.getLongExtra(Config.TIMER_DURATION, Config.INITIAL_TIMER));
+                    Log.i("workouttimer", "Set time Timer");
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -60,11 +65,12 @@ public class TimerService extends Service {
     private void startTimer(){
 
         if(isReset) // Case initial start, start the timer with timerDuration
-            countDownTimer = new CountDownTimer(timerDuration, TIMER_INTERVAL) { // onTick will be called every TIMER_INTERVAL (1 second) for the duration
+            countDownTimer = new CountDownTimer(timerDuration, Config.TIMER_INTERVAL) { // onTick will be called every TIMER_INTERVAL (1 second) for the duration
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    timerTimerLeft = millisUntilFinished;
+                    timerTimeLeft = millisUntilFinished;
                     // TODO: UPDATE UI
+                    sendTimeLeftBroadcast(millisUntilFinished);
                 }
 
                 @Override
@@ -73,11 +79,12 @@ public class TimerService extends Service {
             }.start();
 
         else // Case resume timer
-            countDownTimer = new CountDownTimer(timerTimerLeft, TIMER_INTERVAL) { // onTick will be called every TIMER_INTERVAL (1 second) for the duration
+            countDownTimer = new CountDownTimer(timerTimeLeft, Config.TIMER_INTERVAL) { // onTick will be called every TIMER_INTERVAL (1 second) for the duration
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    timerTimerLeft = millisUntilFinished;
+                    timerTimeLeft = millisUntilFinished;
                     // TODO: UPDATE UI
+                    sendTimeLeftBroadcast(millisUntilFinished);
                 }
 
                 @Override
@@ -99,13 +106,15 @@ public class TimerService extends Service {
 
     // Resets the time left on the timer and updates isReset
     private void resetTimer(){
-
-        timerTimerLeft = timerDuration;
-        isReset = true;
-        // TODO: UPDATE UI
+        if (!isRunning) {
+            timerTimeLeft = timerDuration;
+            isReset = true;
+            // TODO: UPDATE UI
+            sendTimeLeftBroadcast(timerTimeLeft);
+        }
     }
 
-    // Setting a new duration for the timer and reseting the timer
+    // Setting a new duration for the timer and resetting the timer
     private void setTime(long duration) {
 
         if(isRunning)
@@ -114,4 +123,10 @@ public class TimerService extends Service {
         resetTimer();
     }
 
+    private void sendTimeLeftBroadcast(long timerTimerLeft) {
+
+        Intent intent = new Intent(Config.TIMER_BROADCAST_CHANNEL);
+        intent.putExtra(Config.TIMER_BROADCAST_TIME_LEFT, timerTimerLeft);
+        LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(intent);
+    }
 }
