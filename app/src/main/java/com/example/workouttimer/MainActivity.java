@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
     TextView time_tv;
     CircularProgressBar circularProgressBar;
     EditText new_time;
-    Button btn_start, btn_stop, btn_reset, btn_set_time;
+    ImageButton btn_start, btn_stop, btn_reset;
+    Button btn_set_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
