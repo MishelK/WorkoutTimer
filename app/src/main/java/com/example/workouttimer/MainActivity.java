@@ -1,10 +1,12 @@
 package com.example.workouttimer;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.workouttimer.services.TimerService;
 import com.example.workouttimer.utilities.Config;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -25,11 +27,18 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     private SpotifyAppRemote mSpotifyAppRemote;
-
     private BroadcastReceiver timerReceiver;
+
+    long initialTime = Config.INITIAL_TIMER;
+    long remainingTime = Config.INITIAL_TIMER;
+    TextView time_tv;
+    CircularProgressBar circularProgressBar;
+    EditText new_time;
+    Button btn_start, btn_stop, btn_reset, btn_set_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -39,10 +48,52 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long timeLeft = intent.getLongExtra(Config.TIMER_BROADCAST_TIME_LEFT, 0);
-                updateTimeUi(timeLongToString(timeLeft));
+                long progress = intent.getLongExtra(Config.TIMER_BROADCAST_TIME_PROGRESS, 0);
+                remainingTime = timeLeft;
+                // Updating ui
+                updateTimeUi(timeLeft, progress);
+
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(timerReceiver, filter);
+
+        // Init timer UI
+        time_tv = findViewById(R.id.tv_time);
+        circularProgressBar = findViewById(R.id.circularProgressBar);
+        circularProgressBar.setProgressWithAnimation(100, (long)2000);
+
+        new_time = findViewById(R.id.et_new_time);
+        btn_start = findViewById(R.id.btn_start);
+        btn_stop = findViewById(R.id.btn_stop);
+        btn_reset = findViewById(R.id.btn_reset);
+        btn_set_time = findViewById(R.id.btn_set_time);
+        btn_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startTimer();
+            }
+        });
+        btn_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopTimer();
+            }
+        });
+        btn_reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetTimer();
+            }
+        });
+        btn_set_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long time = Long.parseLong(new_time.getText().toString());
+                if (time > 0) {
+                    setTime(time);
+                }
+            }
+        });
 
     }
 
@@ -120,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Resets the timer
     private void resetTimer() {
+        remainingTime = initialTime;
         Intent intent = new Intent(this, TimerService.class);
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_RESET);
         startService(intent);
@@ -127,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Sets a new duration on the timer and resets it
     private void setTime(long time) {
+        initialTime = time;
+        remainingTime = time;
         Intent intent = new Intent(this, TimerService.class);
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_SET_TIME);
         intent.putExtra(Config.TIMER_DURATION, time);
@@ -134,8 +188,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Updates the timer text view with time left
-    private void updateTimeUi(String timeString) {
+    private void updateTimeUi(long timeLeft, float progress) {
         // TODO: IMPLEMENT
+        String timeString = timeLongToString(timeLeft);
+        time_tv.setText(timeString);
+        circularProgressBar.setProgress(progress);
     }
 
     // Gets time in long and converts it to a string representing time in MM:SS format

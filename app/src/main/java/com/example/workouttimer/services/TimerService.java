@@ -75,6 +75,7 @@ public class TimerService extends Service {
 
                 @Override
                 public void onFinish() {
+                    sendTimeLeftBroadcast(0);
                 }
             }.start();
 
@@ -89,6 +90,7 @@ public class TimerService extends Service {
 
                 @Override
                 public void onFinish() {
+                    sendTimeLeftBroadcast(0);
                 }
             }.start();
 
@@ -123,10 +125,11 @@ public class TimerService extends Service {
         resetTimer();
     }
 
-    private void sendTimeLeftBroadcast(long timerTimerLeft) {
-
+    private void sendTimeLeftBroadcast(long timerTimeLeft) {
+        Long progress = (long)((float)timerTimeLeft/timerDuration*100);
         Intent intent = new Intent(Config.TIMER_BROADCAST_CHANNEL);
-        intent.putExtra(Config.TIMER_BROADCAST_TIME_LEFT, timerTimerLeft);
+        intent.putExtra(Config.TIMER_BROADCAST_TIME_LEFT, timerTimeLeft);
+        intent.putExtra(Config.TIMER_BROADCAST_TIME_PROGRESS, progress);
         LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(intent);
     }
 }

@@ -39,4 +39,6 @@ dependencies {
 
     implementation project(":spotify-app-remote-release-0.7.1")
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
+
 }
