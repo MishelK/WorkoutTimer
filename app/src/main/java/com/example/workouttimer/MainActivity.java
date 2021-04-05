@@ -28,50 +28,10 @@ public class MainActivity extends AppCompatActivity {
 
     private BroadcastReceiver timerReceiver;
 
-    TextView tv_song_artist, tv_song_name, tv_time;
-    EditText new_time;
-    Button btn_start, btn_stop, btn_reset, btn_set_time;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        tv_song_artist = findViewById(R.id.tv_song_artist);
-        tv_song_name = findViewById(R.id.tv_song_name);
-        tv_time = findViewById(R.id.tv_time);
-        new_time = findViewById(R.id.et_new_time);
-        btn_start = findViewById(R.id.btn_start);
-        btn_stop = findViewById(R.id.btn_stop);
-        btn_reset = findViewById(R.id.btn_reset);
-        btn_set_time = findViewById(R.id.btn_set_time);
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startTimer();
-            }
-        });
-        btn_stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopTimer();
-            }
-        });
-        btn_reset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetTimer();
-            }
-        });
-        btn_set_time.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long time = Long.parseLong(new_time.getText().toString());
-                if (time > 0) {
-                    setTime(time);
-                }
-            }
-        });
 
         // Setting broadcast listener to timer updates and updating ui accordingly
         IntentFilter filter = new IntentFilter(Config.TIMER_BROADCAST_CHANNEL);
@@ -138,8 +98,7 @@ public class MainActivity extends AppCompatActivity {
                     final Track track = playerState.track;
                     if (track != null) {
                         Log.d("MainActivity", track.name + " by " + track.artist.name);
-                        tv_song_name.setText(track.name);
-                        tv_song_artist.setText(track.artist.name);
+                        // TODO: UPDATE UI
                     }
                 });
 
@@ -176,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Updates the timer text view with time left
     private void updateTimeUi(String timeString) {
-        tv_time.setText(timeString);
+        // TODO: IMPLEMENT
     }
 
     // Gets time in long and converts it to a string representing time in MM:SS format
