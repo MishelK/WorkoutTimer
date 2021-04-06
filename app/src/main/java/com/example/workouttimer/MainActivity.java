@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver timerReceiver;
 
     long initialTime, remainingTime;
-    boolean isRunning, isReset = false;
+    boolean isRunning, isReset, isFinished = false;
 
     TextView time_tv;
     CircularProgressBar circularProgressBar;
@@ -52,9 +52,10 @@ public class MainActivity extends AppCompatActivity {
                 remainingTime = timeLeft;
                 // Updating ui
                 updateTimeUi(timeLeft, progress);
-                if (timeLeft == 0)
+                if (timeLeft == 0) {
                     isRunning = false;
-
+                    isFinished = true;
+                }
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(timerReceiver, filter);
@@ -62,17 +63,20 @@ public class MainActivity extends AppCompatActivity {
         // Init timer UI
         time_tv = findViewById(R.id.tv_time);
         circularProgressBar = findViewById(R.id.circularProgressBar);
-        circularProgressBar.setProgressWithAnimation(100, (long)2000);
         initTimerBtns();
 
-        // Init Timer
-        initialTime = remainingTime = Config.INITIAL_TIMER;
-        isReset = true;
-        updateTimeUi(Config.INITIAL_TIMER, 100);
+        // Init Timer if first started
+        if (!isFinished) {
+            initialTime = remainingTime = Config.INITIAL_TIMER;
+            isReset = true;
+            updateTimeUi(Config.INITIAL_TIMER, 100);
+            circularProgressBar.setProgressWithAnimation(100, (long) 2000);
+        }
+        else
+            updateTimeUi(0,0);
 
         // Init spotify player UI
         initSpotifyPlayerBtns();
-
 
     }
 
@@ -141,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_START);
         startService(intent);
         isRunning = true;
+        isFinished = true;
     }
 
     // Stops the timer
