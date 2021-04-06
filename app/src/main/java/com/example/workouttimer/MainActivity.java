@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
                 remainingTime = timeLeft;
                 // Updating ui
                 updateTimeUi(timeLeft, progress);
+                if (timeLeft == 0)
+                    isRunning = false;
 
             }
         };
@@ -160,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         // Removing local broadcast listener
         LocalBroadcastManager.getInstance(this).unregisterReceiver(timerReceiver);
+        stopTimer();
     }
 
     // Setting a spotify player listener with a callback that updates UI

@@ -2,7 +2,8 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black">
 
     <TextView
         android:layout_width="wrap_content"
@@ -10,5 +11,15 @@
         android:text="Timer Running"
         android:layout_marginStart="10dp"
         android:layout_gravity="center_vertical"
+        android:textColor="@color/white"/>
+
+    <TextView
+        android:id="@+id/notif_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:layout_marginStart="10dp"
+        android:layout_gravity="center_vertical"
+        android:textSize="18sp"
         android:textColor="@color/white"/>
 </LinearLayout>

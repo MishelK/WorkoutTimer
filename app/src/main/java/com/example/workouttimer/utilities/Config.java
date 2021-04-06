@@ -7,7 +7,7 @@ public class Config {
 
     // Timer Service
     public static final long TIMER_INCREMENT = 10000;
-    public static final long TIMER_INTERVAL = 100;
+    public static final long TIMER_INTERVAL = 500;
     public static final long INITIAL_TIMER = 10000;
     public static final String TIMER_COMMAND = "command";
     public static final String TIMER_START = "start";

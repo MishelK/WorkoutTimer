@@ -33,6 +33,7 @@ public class TimerService extends Service {
 
     NotificationManager manager;
     NotificationCompat.Builder builder;
+    RemoteViews remoteViews;
 
     @Nullable
     @Override
@@ -47,29 +48,32 @@ public class TimerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) { // Called from startService()
-        String command = intent.getStringExtra(Config.TIMER_COMMAND);
-        if (command != null) {
-            switch (command) {
-                case Config.TIMER_START:
-                    startTimer();
-                    Log.i("workouttimer", "Start Timer");
-                    break;
-                case Config.TIMER_STOP:
-                    stopTimer();
-                    Log.i("workouttimer", "Stop Timer");
-                    break;
-                case Config.TIMER_RESET:
-                    resetTimer();
-                    Log.i("workouttimer", "Reset Timer");
-                    break;
-                case Config.TIMER_SET_TIME:
-                    setTime(intent.getLongExtra(Config.TIMER_DURATION, Config.INITIAL_TIMER));
-                    Log.i("workouttimer", "Set time Timer");
+
+        if (intent != null) {
+            String command = intent.getStringExtra(Config.TIMER_COMMAND);
+            if (command != null) {
+                switch (command) {
+                    case Config.TIMER_START:
+                        startTimer();
+                        Log.i("workouttimer", "Start Timer");
+                        break;
+                    case Config.TIMER_STOP:
+                        stopTimer();
+                        removeNotification();
+                        Log.i("workouttimer", "Stop Timer");
+                        break;
+                    case Config.TIMER_RESET:
+                        resetTimer();
+                        Log.i("workouttimer", "Reset Timer");
+                        break;
+                    case Config.TIMER_SET_TIME:
+                        setTime(intent.getLongExtra(Config.TIMER_DURATION, Config.INITIAL_TIMER));
+                        Log.i("workouttimer", "Set time Timer");
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId);
     }
-
 
     @Override
     public void onDestroy() {
@@ -86,12 +90,15 @@ public class TimerService extends Service {
                     timerTimeLeft = millisUntilFinished;
                     // TODO: UPDATE UI
                     sendTimeLeftBroadcast(millisUntilFinished);
-                    startNotification(timerDuration);
+                    startNotification(millisUntilFinished);
+                    updateNotification(millisUntilFinished);
                 }
 
                 @Override
                 public void onFinish() {
                     sendTimeLeftBroadcast(0);
+                    stopTimer();
+                    removeNotification();
                 }
             }.start();
 
@@ -102,12 +109,15 @@ public class TimerService extends Service {
                     timerTimeLeft = millisUntilFinished;
                     // TODO: UPDATE UI
                     sendTimeLeftBroadcast(millisUntilFinished);
-                    startNotification(timerTimeLeft);
+                    startNotification(millisUntilFinished);
+                    updateNotification(millisUntilFinished);
                 }
 
                 @Override
                 public void onFinish() {
                     sendTimeLeftBroadcast(0);
+                    stopTimer();
+                    removeNotification();
                 }
             }.start();
 
@@ -130,7 +140,6 @@ public class TimerService extends Service {
             isReset = true;
             // TODO: UPDATE UI
             sendTimeLeftBroadcast(timerTimeLeft);
-            manager.cancel(NOTIF_ID); // Canceling notification
         }
     }
 
@@ -153,7 +162,7 @@ public class TimerService extends Service {
         LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(intent);
     }
 
-    private void startNotification (long duration) {
+    private void startNotification (long time) {
         // Building Notification
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) {
@@ -162,7 +171,7 @@ public class TimerService extends Service {
         }
         builder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID);
         builder.setNotificationSilent();
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notif_layout);
+        remoteViews = new RemoteViews(getPackageName(), R.layout.notif_layout);
 
         // Building pending intent
         Intent intent = new Intent(this, MainActivity.class);
@@ -172,9 +181,35 @@ public class TimerService extends Service {
         // Starting Notification
         builder.setCustomContentView(remoteViews);
         builder.setContentIntent(pendingIntent);
-        builder.setTimeoutAfter(duration);
         builder.setSmallIcon(R.drawable.ic_play_button);
-
-        startForeground(NOTIF_ID, builder.build());
+        builder.setOngoing(true);
+        //startForeground(NOTIF_ID, builder.build());
+        manager.notify(NOTIF_ID, builder.build());
     }
+
+    private void updateNotification (long time) {
+        remoteViews.setTextViewText(R.id.notif_time, timeLongToString(time));
+        //startForeground(NOTIF_ID, builder.build());
+        manager.notify(NOTIF_ID, builder.build());
+    }
+
+    private void removeNotification() {
+        if (manager != null)
+            manager.cancel(NOTIF_ID);
+    }
+
+    // Gets time in long and converts it to a string representing time in MM:SS format
+    private String timeLongToString(long time) {
+
+        String timeString = "";
+        int minutes = (int) time / 60000;
+        int seconds = (int) time % 60000 / 1000; // after performing % and removing time left in minutes we divide by 1000 to we have the number of seconds left
+        if (minutes < 10) timeString += "0";
+        timeString += "" + minutes;
+        timeString += ":";
+        if (seconds < 10) timeString += "0";
+        timeString += seconds;
+        return  timeString;
+    }
+
 }
