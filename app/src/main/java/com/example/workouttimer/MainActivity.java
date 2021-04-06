@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
     TextView time_tv;
     CircularProgressBar circularProgressBar;
-    Button btn_start, btn_stop, btn_reset, btn_plus, btn_minus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,58 +63,16 @@ public class MainActivity extends AppCompatActivity {
         time_tv = findViewById(R.id.tv_time);
         circularProgressBar = findViewById(R.id.circularProgressBar);
         circularProgressBar.setProgressWithAnimation(100, (long)2000);
+        initTimerBtns();
 
         // Init Timer
         initialTime = remainingTime = Config.INITIAL_TIMER;
         isReset = true;
         updateTimeUi(Config.INITIAL_TIMER, 100);
 
-        // Test views
-        btn_plus = findViewById(R.id.btn_plus);
-        btn_minus = findViewById(R.id.btn_minus);
-        btn_start = findViewById(R.id.btn_start);
-        btn_stop = findViewById(R.id.btn_stop);
-        btn_reset = findViewById(R.id.btn_reset);
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startTimer();
-            }
-        });
-        btn_stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopTimer();
-            }
-        });
-        btn_reset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetTimer();
-            }
-        });
-        btn_plus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (initialTime < 3600000 && !isRunning && isReset){ // Less than 60:00, paused and reset
-                    initialTime += Config.TIMER_INCREMENT;
-                    remainingTime = initialTime;
-                    updateTimeUi(initialTime, 100);
-                    setTime(initialTime);
-                }
-            }
-        });
-        btn_minus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (initialTime >= Config.TIMER_INCREMENT && !isRunning && isReset){ // Less than 60:00, paused and reset
-                    initialTime -= Config.TIMER_INCREMENT;
-                    remainingTime = initialTime;
-                    updateTimeUi(initialTime, 100);
-                    setTime(initialTime);
-                }
-            }
-        });
+        // Init spotify player UI
+        initSpotifyPlayerBtns();
+
 
     }
 
@@ -176,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
                         // TODO: UPDATE UI
                     }
                 });
-
     }
 
     // Starts/resumes the timer
@@ -244,6 +200,90 @@ public class MainActivity extends AppCompatActivity {
     // Decrements the timer by TIMER_INCREMENT (default 10 sec)
     private void decrementTimer() {
 
+    }
+
+    private void initSpotifyPlayerBtns (){
+        Button btn_prev, btn_pause, btn_resume, btn_next;
+
+        btn_pause = findViewById(R.id.player_pause);
+        btn_resume = findViewById(R.id.player_play);
+        btn_prev = findViewById(R.id.player_prev);
+        btn_next = findViewById(R.id.player_next);
+
+        btn_pause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSpotifyAppRemote.getPlayerApi().pause();
+            }
+        });
+        btn_resume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSpotifyAppRemote.getPlayerApi().resume();
+            }
+        });
+        btn_prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSpotifyAppRemote.getPlayerApi().skipPrevious();
+            }
+        });
+        btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSpotifyAppRemote.getPlayerApi().skipNext();
+            }
+        });
+    }
+
+    private void initTimerBtns () {
+        Button btn_start, btn_stop, btn_reset, btn_plus, btn_minus;
+
+        btn_plus = findViewById(R.id.btn_plus);
+        btn_minus = findViewById(R.id.btn_minus);
+        btn_start = findViewById(R.id.btn_start);
+        btn_stop = findViewById(R.id.btn_stop);
+        btn_reset = findViewById(R.id.btn_reset);
+        btn_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startTimer();
+            }
+        });
+        btn_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopTimer();
+            }
+        });
+        btn_reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetTimer();
+            }
+        });
+        btn_plus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (initialTime < 3600000 && !isRunning && isReset){ // Less than 60:00, paused and reset
+                    initialTime += Config.TIMER_INCREMENT;
+                    remainingTime = initialTime;
+                    updateTimeUi(initialTime, 100);
+                    setTime(initialTime);
+                }
+            }
+        });
+        btn_minus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (initialTime >= Config.TIMER_INCREMENT && !isRunning && isReset){ // Less than 60:00, paused and reset
+                    initialTime -= Config.TIMER_INCREMENT;
+                    remainingTime = initialTime;
+                    updateTimeUi(initialTime, 100);
+                    setTime(initialTime);
+                }
+            }
+        });
     }
 
 }
