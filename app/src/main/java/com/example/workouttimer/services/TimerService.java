@@ -125,8 +125,10 @@ public class TimerService extends Service {
         resetTimer();
     }
 
+    // Sends out a local broadcast with the time left on the timer and its current progress
     private void sendTimeLeftBroadcast(long timerTimeLeft) {
-        Long progress = (long)((float)timerTimeLeft/timerDuration*100);
+        Long progress = (long)((float)timerTimeLeft/timerDuration*100); // Calculating progress
+
         Intent intent = new Intent(Config.TIMER_BROADCAST_CHANNEL);
         intent.putExtra(Config.TIMER_BROADCAST_TIME_LEFT, timerTimeLeft);
         intent.putExtra(Config.TIMER_BROADCAST_TIME_PROGRESS, progress);

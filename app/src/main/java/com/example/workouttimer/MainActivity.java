@@ -34,9 +34,7 @@ public class MainActivity extends AppCompatActivity {
     long remainingTime = Config.INITIAL_TIMER;
     TextView time_tv;
     CircularProgressBar circularProgressBar;
-    EditText new_time;
-    ImageButton btn_start, btn_stop, btn_reset;
-    Button btn_set_time;
+    ImageButton btn_start, btn_stop, btn_reset, btn_plus, btn_minus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +62,10 @@ public class MainActivity extends AppCompatActivity {
         circularProgressBar = findViewById(R.id.circularProgressBar);
         circularProgressBar.setProgressWithAnimation(100, (long)2000);
 
-        new_time = findViewById(R.id.et_new_time);
+        // Test views
         btn_start = findViewById(R.id.btn_start);
         btn_stop = findViewById(R.id.btn_stop);
         btn_reset = findViewById(R.id.btn_reset);
-        btn_set_time = findViewById(R.id.btn_set_time);
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,15 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 resetTimer();
             }
         });
-        btn_set_time.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long time = Long.parseLong(new_time.getText().toString());
-                if (time > 0) {
-                    setTime(time);
-                }
-            }
-        });
 
     }
 
@@ -103,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        // Connecting to spotify app remote
-        // Setting the connection parameters
+        // Setting spotify connection parameters
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(Config.CLIENT_ID)
                         .setRedirectUri(Config.REDIRECT_URI)
@@ -134,12 +121,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        // Disconnecting from app remote
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Removing local broadcast listener
         LocalBroadcastManager.getInstance(this).unregisterReceiver(timerReceiver);
     }
 
@@ -189,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         startService(intent);
     }
 
-    // Updates the timer text view with time left
+    // Updates the timer text view with time left and progressbar with progress %
     private void updateTimeUi(long timeLeft, float progress) {
         // TODO: IMPLEMENT
         String timeString = timeLongToString(timeLeft);
