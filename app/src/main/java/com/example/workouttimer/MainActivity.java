@@ -30,11 +30,12 @@ public class MainActivity extends AppCompatActivity {
     private SpotifyAppRemote mSpotifyAppRemote;
     private BroadcastReceiver timerReceiver;
 
-    long initialTime = Config.INITIAL_TIMER;
-    long remainingTime = Config.INITIAL_TIMER;
+    long initialTime, remainingTime;
+    boolean isRunning, isReset = false;
+
     TextView time_tv;
     CircularProgressBar circularProgressBar;
-    ImageButton btn_start, btn_stop, btn_reset, btn_plus, btn_minus;
+    Button btn_start, btn_stop, btn_reset, btn_plus, btn_minus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +63,14 @@ public class MainActivity extends AppCompatActivity {
         circularProgressBar = findViewById(R.id.circularProgressBar);
         circularProgressBar.setProgressWithAnimation(100, (long)2000);
 
+        // Init Timer
+        initialTime = remainingTime = Config.INITIAL_TIMER;
+        isReset = true;
+        updateTimeUi(Config.INITIAL_TIMER, 100);
+
         // Test views
+        btn_plus = findViewById(R.id.btn_plus);
+        btn_minus = findViewById(R.id.btn_minus);
         btn_start = findViewById(R.id.btn_start);
         btn_stop = findViewById(R.id.btn_stop);
         btn_reset = findViewById(R.id.btn_reset);
@@ -82,6 +90,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 resetTimer();
+            }
+        });
+        btn_plus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (initialTime < 3600000 && !isRunning && isReset){ // Less than 60:00, paused and reset
+                    initialTime += Config.TIMER_INCREMENT;
+                    remainingTime = initialTime;
+                    updateTimeUi(initialTime, 100);
+                    setTime(initialTime);
+                }
+            }
+        });
+        btn_minus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (initialTime >= Config.TIMER_INCREMENT && !isRunning && isReset){ // Less than 60:00, paused and reset
+                    initialTime -= Config.TIMER_INCREMENT;
+                    remainingTime = initialTime;
+                    updateTimeUi(initialTime, 100);
+                    setTime(initialTime);
+                }
             }
         });
 
@@ -151,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TimerService.class);
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_START);
         startService(intent);
+        isRunning = true;
     }
 
     // Stops the timer
@@ -158,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TimerService.class);
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_STOP);
         startService(intent);
+        isRunning = false;
     }
 
     // Resets the timer
@@ -166,16 +198,17 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TimerService.class);
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_RESET);
         startService(intent);
+        isReset = true;
     }
 
     // Sets a new duration on the timer and resets it
     private void setTime(long time) {
-        initialTime = time;
-        remainingTime = time;
-        Intent intent = new Intent(this, TimerService.class);
-        intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_SET_TIME);
-        intent.putExtra(Config.TIMER_DURATION, time);
-        startService(intent);
+        if (!isRunning) {
+            Intent intent = new Intent(this, TimerService.class);
+            intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_SET_TIME);
+            intent.putExtra(Config.TIMER_DURATION, time);
+            startService(intent);
+        }
     }
 
     // Updates the timer text view with time left and progressbar with progress %
@@ -199,6 +232,17 @@ public class MainActivity extends AppCompatActivity {
         timeString += seconds;
         return  timeString;
     }
+
+    // Increments the timer by TIMER_INCREMENT (default 10 sec)
+    private void incrementTimer() {
+
+    }
+
+    // Decrements the timer by TIMER_INCREMENT (default 10 sec)
+    private void decrementTimer() {
+
+    }
+
 }
 
 

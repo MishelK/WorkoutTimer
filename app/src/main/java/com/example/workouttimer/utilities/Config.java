@@ -6,6 +6,7 @@ public class Config {
     public static final String REDIRECT_URI = "workouttimer://callback";
 
     // Timer Service
+    public static final long TIMER_INCREMENT = 10000;
     public static final long TIMER_INTERVAL = 100;
     public static final long INITIAL_TIMER = 10000;
     public static final String TIMER_COMMAND = "command";
