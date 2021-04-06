@@ -23,7 +23,10 @@
 
     </application>
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <queries>
         <package android:name="com.spotify.music" />
     </queries>
+
 </manifest>

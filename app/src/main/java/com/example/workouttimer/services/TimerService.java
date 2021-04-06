@@ -1,23 +1,38 @@
 package com.example.workouttimer.services;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.workouttimer.MainActivity;
+import com.example.workouttimer.R;
 import com.example.workouttimer.utilities.Config;
 
 public class TimerService extends Service {
+
+    private static final String NOTIF_CHANNEL_NAME = "WorkoutTimer Channel";
+    private static final String NOTIF_CHANNEL_ID = "MK_NOTIF_CHANNEL";
+    private static final int NOTIF_ID = 1;
 
     private CountDownTimer countDownTimer;
     private long timerDuration = Config.INITIAL_TIMER; //Used upon initial start of timer
     private long timerTimeLeft = Config.INITIAL_TIMER; // Used for pausing and resuming a timer
     private boolean isReset = false; // Used for determining if startTimer is initial or a resume
     private boolean isRunning = false; // Used for determining if timer is running
+
+    NotificationManager manager;
+    NotificationCompat.Builder builder;
 
     @Nullable
     @Override
@@ -71,6 +86,7 @@ public class TimerService extends Service {
                     timerTimeLeft = millisUntilFinished;
                     // TODO: UPDATE UI
                     sendTimeLeftBroadcast(millisUntilFinished);
+                    startNotification(timerDuration);
                 }
 
                 @Override
@@ -86,6 +102,7 @@ public class TimerService extends Service {
                     timerTimeLeft = millisUntilFinished;
                     // TODO: UPDATE UI
                     sendTimeLeftBroadcast(millisUntilFinished);
+                    startNotification(timerTimeLeft);
                 }
 
                 @Override
@@ -113,6 +130,7 @@ public class TimerService extends Service {
             isReset = true;
             // TODO: UPDATE UI
             sendTimeLeftBroadcast(timerTimeLeft);
+            manager.cancel(NOTIF_ID); // Canceling notification
         }
     }
 
@@ -133,5 +151,30 @@ public class TimerService extends Service {
         intent.putExtra(Config.TIMER_BROADCAST_TIME_LEFT, timerTimeLeft);
         intent.putExtra(Config.TIMER_BROADCAST_TIME_PROGRESS, progress);
         LocalBroadcastManager.getInstance(TimerService.this).sendBroadcast(intent);
+    }
+
+    private void startNotification (long duration) {
+        // Building Notification
+        manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, NOTIF_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+            manager.createNotificationChannel(channel);
+        }
+        builder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID);
+        builder.setNotificationSilent();
+        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notif_layout);
+
+        // Building pending intent
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("running", true);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Starting Notification
+        builder.setCustomContentView(remoteViews);
+        builder.setContentIntent(pendingIntent);
+        builder.setTimeoutAfter(duration);
+        builder.setSmallIcon(R.drawable.ic_play_button);
+
+        startForeground(NOTIF_ID, builder.build());
     }
 }
