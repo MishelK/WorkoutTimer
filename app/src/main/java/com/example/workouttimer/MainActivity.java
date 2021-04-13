@@ -1,5 +1,6 @@
 package com.example.workouttimer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -17,6 +18,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,10 +33,12 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver timerReceiver;
 
     long initialTime, remainingTime;
+    float progress;
     boolean isRunning, isReset, isFinished = false;
 
     TextView time_tv;
     CircularProgressBar circularProgressBar;
+    Button btn_start_stop, btn_reset, btn_plus, btn_minus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long timeLeft = intent.getLongExtra(Config.TIMER_BROADCAST_TIME_LEFT, 0);
-                long progress = intent.getLongExtra(Config.TIMER_BROADCAST_TIME_PROGRESS, 0);
+                progress = intent.getLongExtra(Config.TIMER_BROADCAST_TIME_PROGRESS, 0);
                 remainingTime = timeLeft;
                 // Updating ui
                 updateTimeUi(timeLeft, progress);
@@ -67,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Init Timer if first started
         if (!isFinished) {
-            initialTime = remainingTime = Config.INITIAL_TIMER;
+            initialTime = remainingTime = getInitialTime();
             isReset = true;
-            updateTimeUi(Config.INITIAL_TIMER, 100);
+            updateTimeUi(initialTime, 100);
             circularProgressBar.setProgressWithAnimation(100, (long) 2000);
         }
         else
@@ -79,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         initSpotifyPlayerBtns();
 
     }
+
 
     @Override
     protected void onStart() {
@@ -145,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_START);
         startService(intent);
         isRunning = true;
-        isFinished = true;
+        isFinished = false;
     }
 
     // Stops the timer
@@ -168,16 +173,20 @@ public class MainActivity extends AppCompatActivity {
     // Sets a new duration on the timer and resets it
     private void setTime(long time) {
         if (!isRunning) {
+            // Updating service
             Intent intent = new Intent(this, TimerService.class);
             intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_SET_TIME);
             intent.putExtra(Config.TIMER_DURATION, time);
             startService(intent);
+
+            // Updating SP
+            SharedPreferences sp = this.getSharedPreferences(Config.SP_KEY, Context.MODE_PRIVATE);
+            sp.edit().putLong(Config.SP_INIT_TIME_KEY, time).apply();
         }
     }
 
     // Updates the timer text view with time left and progressbar with progress %
     private void updateTimeUi(long timeLeft, float progress) {
-        // TODO: IMPLEMENT
         String timeString = timeLongToString(timeLeft);
         time_tv.setText(timeString);
         circularProgressBar.setProgress(progress);
@@ -197,15 +206,15 @@ public class MainActivity extends AppCompatActivity {
         return  timeString;
     }
 
-    // Increments the timer by TIMER_INCREMENT (default 10 sec)
-    private void incrementTimer() {
+    private long getInitialTime() {
 
+        // Attempting to fetch initial time from sp, else return CFG.INITIAL_TIMER
+        SharedPreferences sp = this.getSharedPreferences(Config.SP_KEY, Context.MODE_PRIVATE);
+        long result = sp.getLong(Config.SP_INIT_TIME_KEY, Config.INITIAL_TIMER);
+
+        return result;
     }
 
-    // Decrements the timer by TIMER_INCREMENT (default 10 sec)
-    private void decrementTimer() {
-
-    }
 
     private void initSpotifyPlayerBtns (){
         Button btn_prev, btn_pause, btn_resume, btn_next;
@@ -242,29 +251,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTimerBtns () {
-        Button btn_start, btn_stop, btn_reset, btn_plus, btn_minus;
 
         btn_plus = findViewById(R.id.btn_plus);
         btn_minus = findViewById(R.id.btn_minus);
-        btn_start = findViewById(R.id.btn_start);
-        btn_stop = findViewById(R.id.btn_stop);
+        btn_start_stop = findViewById(R.id.btn_start_stop);
+
         btn_reset = findViewById(R.id.btn_reset);
-        btn_start.setOnClickListener(new View.OnClickListener() {
+        btn_start_stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startTimer();
-            }
-        });
-        btn_stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopTimer();
+                if (isRunning) {
+                    stopTimer();
+                    btn_start_stop.setBackgroundResource(R.drawable.ic_play_button);
+                }
+                else {
+                    startTimer();
+                    btn_start_stop.setBackgroundResource(R.drawable.ic_video_pause);
+                }
             }
         });
         btn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 resetTimer();
+                btn_start_stop.setBackgroundResource(R.drawable.ic_play_button);
             }
         });
         btn_plus.setOnClickListener(new View.OnClickListener() {

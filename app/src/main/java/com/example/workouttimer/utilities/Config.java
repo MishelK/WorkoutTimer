@@ -20,4 +20,8 @@ public class Config {
     public static final String TIMER_BROADCAST_CHANNEL = "timer_channel";
     public static final String TIMER_BROADCAST_TIME_LEFT = "time_left";
     public static final String TIMER_BROADCAST_TIME_PROGRESS = "time_progress";
+
+    // Shared Preferences
+    public static final String SP_KEY = "com.example.workouttimer";
+    public static final String SP_INIT_TIME_KEY = "initial_time";
 }

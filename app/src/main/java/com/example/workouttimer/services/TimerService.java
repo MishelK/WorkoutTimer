@@ -44,6 +44,11 @@ public class TimerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, NOTIF_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+            manager.createNotificationChannel(channel);
+        }
     }
 
     @Override
@@ -59,7 +64,7 @@ public class TimerService extends Service {
                         break;
                     case Config.TIMER_STOP:
                         stopTimer();
-                        removeNotification();
+                        removeNotification(NOTIF_ID);
                         Log.i("workouttimer", "Stop Timer");
                         break;
                     case Config.TIMER_RESET:
@@ -83,14 +88,14 @@ public class TimerService extends Service {
     // If isReset then starts timer with initial timerDuration, else, resumes timer with timerTimeLeft
     private void startTimer(){
 
-        if(isReset) // Case initial start, start the timer with timerDuration
+        if(isReset) { // Case initial start, start the timer with timerDuration
+            removeNotification(NOTIF_ID);
+            startNotification(timerDuration);
             countDownTimer = new CountDownTimer(timerDuration, Config.TIMER_INTERVAL) { // onTick will be called every TIMER_INTERVAL (1 second) for the duration
                 @Override
                 public void onTick(long millisUntilFinished) {
                     timerTimeLeft = millisUntilFinished;
-                    // TODO: UPDATE UI
                     sendTimeLeftBroadcast(millisUntilFinished);
-                    startNotification(millisUntilFinished);
                     updateNotification(millisUntilFinished);
                 }
 
@@ -98,18 +103,20 @@ public class TimerService extends Service {
                 public void onFinish() {
                     sendTimeLeftBroadcast(0);
                     stopTimer();
-                    removeNotification();
+                    removeNotification(NOTIF_ID);
+                    startTimerFinishedNotification();
                 }
             }.start();
+        }
 
-        else // Case resume timer
+        else { // Case resume timer
+            removeNotification(NOTIF_ID);
+            startNotification(timerTimeLeft);
             countDownTimer = new CountDownTimer(timerTimeLeft, Config.TIMER_INTERVAL) { // onTick will be called every TIMER_INTERVAL (1 second) for the duration
                 @Override
                 public void onTick(long millisUntilFinished) {
                     timerTimeLeft = millisUntilFinished;
-                    // TODO: UPDATE UI
                     sendTimeLeftBroadcast(millisUntilFinished);
-                    startNotification(millisUntilFinished);
                     updateNotification(millisUntilFinished);
                 }
 
@@ -117,9 +124,11 @@ public class TimerService extends Service {
                 public void onFinish() {
                     sendTimeLeftBroadcast(0);
                     stopTimer();
-                    removeNotification();
+                    removeNotification(NOTIF_ID);
+                    startTimerFinishedNotification();
                 }
             }.start();
+        }
 
         isReset = false;
         isRunning = true;
@@ -164,11 +173,6 @@ public class TimerService extends Service {
 
     private void startNotification (long time) {
         // Building Notification
-        manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, NOTIF_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
-            manager.createNotificationChannel(channel);
-        }
         builder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID);
         builder.setNotificationSilent();
         remoteViews = new RemoteViews(getPackageName(), R.layout.notif_layout);
@@ -193,9 +197,32 @@ public class TimerService extends Service {
         manager.notify(NOTIF_ID, builder.build());
     }
 
-    private void removeNotification() {
+    private void removeNotification(int id) {
         if (manager != null)
-            manager.cancel(NOTIF_ID);
+            manager.cancel(id);
+    }
+
+    private void startTimerFinishedNotification() {
+        // Building Notification
+        builder = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID);
+        builder.setNotificationSilent();
+        remoteViews = new RemoteViews(getPackageName(), R.layout.notif_layout);
+        remoteViews.setTextViewText(R.id.notif_text, "Time is up!");
+        remoteViews.setTextViewText(R.id.notif_time, "00:00");
+
+        // Building pending intent
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("running", true);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Starting Notification
+        builder.setCustomContentView(remoteViews);
+        builder.setContentIntent(pendingIntent);
+        builder.setSmallIcon(R.drawable.ic_play_button);
+        builder.setOngoing(false);
+        builder.setVibrate(new long[] {0, 100, 1000, 200, 2000});
+        //startForeground(NOTIF_ID, builder.build());
+        manager.notify(NOTIF_ID, builder.build());
     }
 
     // Gets time in long and converts it to a string representing time in MM:SS format
