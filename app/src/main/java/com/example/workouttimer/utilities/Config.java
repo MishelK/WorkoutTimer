@@ -13,6 +13,7 @@ public class Config {
     public static final String TIMER_START = "start";
     public static final String TIMER_STOP = "stop";
     public static final String TIMER_RESET = "reset";
+    public static final String TIMER_TIME = "initial_time";
     public static final String TIMER_SET_TIME = "set_time";
     public static final String TIMER_DURATION = "duration";
 

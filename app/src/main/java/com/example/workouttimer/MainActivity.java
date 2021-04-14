@@ -1,6 +1,5 @@
 package com.example.workouttimer;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -23,8 +22,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -148,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
     private void startTimer() {
         Intent intent = new Intent(this, TimerService.class);
         intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_START);
+        intent.putExtra(Config.TIMER_TIME, initialTime);
         startService(intent);
         isRunning = true;
         isFinished = false;
@@ -171,14 +169,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Sets a new duration on the timer and resets it
-    private void setTime(long time) {
+    private void updateTime(long time) {
         if (!isRunning) {
-            // Updating service
-            Intent intent = new Intent(this, TimerService.class);
-            intent.putExtra(Config.TIMER_COMMAND, Config.TIMER_SET_TIME);
-            intent.putExtra(Config.TIMER_DURATION, time);
-            startService(intent);
-
             // Updating SP
             SharedPreferences sp = this.getSharedPreferences(Config.SP_KEY, Context.MODE_PRIVATE);
             sp.edit().putLong(Config.SP_INIT_TIME_KEY, time).apply();
@@ -284,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                     initialTime += Config.TIMER_INCREMENT;
                     remainingTime = initialTime;
                     updateTimeUi(initialTime, 100);
-                    setTime(initialTime);
+                    updateTime(initialTime);
                 }
             }
         });
@@ -295,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                     initialTime -= Config.TIMER_INCREMENT;
                     remainingTime = initialTime;
                     updateTimeUi(initialTime, 100);
-                    setTime(initialTime);
+                    updateTime(initialTime);
                 }
             }
         });

@@ -4,7 +4,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
@@ -26,8 +28,8 @@ public class TimerService extends Service {
     private static final int NOTIF_ID = 1;
 
     private CountDownTimer countDownTimer;
-    private long timerDuration = Config.INITIAL_TIMER; //Used upon initial start of timer
-    private long timerTimeLeft = Config.INITIAL_TIMER; // Used for pausing and resuming a timer
+    private long timerDuration; //Used upon initial start of timer
+    private long timerTimeLeft; // Used for pausing and resuming a timer
     private boolean isReset = false; // Used for determining if startTimer is initial or a resume
     private boolean isRunning = false; // Used for determining if timer is running
 
@@ -49,6 +51,7 @@ public class TimerService extends Service {
             NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, NOTIF_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
             manager.createNotificationChannel(channel);
         }
+        timerDuration = timerTimeLeft = getInitialTime();
     }
 
     @Override
@@ -59,6 +62,7 @@ public class TimerService extends Service {
             if (command != null) {
                 switch (command) {
                     case Config.TIMER_START:
+                        timerDuration = intent.getLongExtra(Config.TIMER_TIME, Config.INITIAL_TIMER);
                         startTimer();
                         Log.i("workouttimer", "Start Timer");
                         break;
@@ -71,9 +75,6 @@ public class TimerService extends Service {
                         resetTimer();
                         Log.i("workouttimer", "Reset Timer");
                         break;
-                    case Config.TIMER_SET_TIME:
-                        setTime(intent.getLongExtra(Config.TIMER_DURATION, Config.INITIAL_TIMER));
-                        Log.i("workouttimer", "Set time Timer");
                 }
             }
         }
@@ -152,15 +153,6 @@ public class TimerService extends Service {
         }
     }
 
-    // Setting a new duration for the timer and resetting the timer
-    private void setTime(long duration) {
-
-        if(isRunning)
-            stopTimer();
-        timerDuration = duration;
-        resetTimer();
-    }
-
     // Sends out a local broadcast with the time left on the timer and its current progress
     private void sendTimeLeftBroadcast(long timerTimeLeft) {
         Long progress = (long)((float)timerTimeLeft/timerDuration*100); // Calculating progress
@@ -237,6 +229,15 @@ public class TimerService extends Service {
         if (seconds < 10) timeString += "0";
         timeString += seconds;
         return  timeString;
+    }
+
+    private long getInitialTime() {
+
+        // Attempting to fetch initial time from sp, else return CFG.INITIAL_TIMER
+        SharedPreferences sp = getApplicationContext().getSharedPreferences(Config.SP_KEY, Context.MODE_PRIVATE);
+        long result = sp.getLong(Config.SP_INIT_TIME_KEY, Config.INITIAL_TIMER);
+
+        return result;
     }
 
 }
