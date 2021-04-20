@@ -9,4 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="background">#DDDDDD</color>
     <color name="background_dark_tint">#868587</color>
+    <color name="rzr_green">#47E10C</color>
+    <color name="grey">#4b4c4d</color>
+    <color name="grey_lighter">#5F5F60</color>
 </resources>

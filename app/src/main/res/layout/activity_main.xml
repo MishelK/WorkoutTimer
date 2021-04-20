@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/grey_lighter">
 
 
     <FrameLayout
@@ -19,10 +19,10 @@
             android:id="@+id/circularProgressBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cpb_background_progressbar_color="@color/background_dark_tint"
+            app:cpb_background_progressbar_color="@color/grey"
             app:cpb_background_progressbar_width="7dp"
             app:cpb_progress_direction="to_right"
-            app:cpb_progressbar_color="@color/black"
+            app:cpb_progressbar_color="@color/rzr_green"
             app:cpb_progressbar_width="7dp"
             app:cpb_round_border="false"
             android:layout_marginHorizontal="20dp"/>
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:text="00:00"
                 android:gravity="center"
-                android:textColor="@color/black"
+                android:textColor="@color/rzr_green"
                 android:textSize="74sp" />
 
             <androidx.appcompat.widget.AppCompatButton
@@ -88,35 +88,10 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <include
+        layout="@layout/spotify_layout"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center_horizontal">
-
-        <Button
-            android:id="@+id/player_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Prev"/>
-
-        <Button
-            android:id="@+id/player_pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="pause"/>
-
-        <Button
-            android:id="@+id/player_play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="play"/>
-
-        <Button
-            android:id="@+id/player_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="next"/>
-    </LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="5dp"/>
 
 </LinearLayout>
