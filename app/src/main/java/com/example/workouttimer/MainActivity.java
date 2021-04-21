@@ -32,17 +32,17 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     private SpotifyAppRemote mSpotifyAppRemote;
-    private BroadcastReceiver timerReceiver;
+    private BroadcastReceiver timerReceiver; // Timer broadcast receiver
 
-    long initialTime, remainingTime;
-    float progress;
+    long initialTime, remainingTime; // Timer trackers
+    float progress; // Used for progress percentage while painting progressBar
     boolean isRunning, isReset, isFinished, isPlaying = false;
 
-    CircularProgressBar circularProgressBar;
+    CircularProgressBar circularProgressBar; // Timer progressBar
     Button btn_start_stop, btn_reset, btn_plus, btn_minus; // Timer Buttons
     Button btn_prev, btn_pause_play, btn_next; // Spotify Buttons
-    TextView time_tv, song_name_tv, song_artist_tv;
-    ImageView song_image;
+    TextView time_tv, song_name_tv, song_artist_tv; // Timer tv, spotify song details tv's
+    ImageView song_image; // Spotify song imageView
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Setting a spotify player listener with a callback that updates UI
     private void onConnectSpotify() {
+        // Setting spotify player state listener
         mSpotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(playerState -> {
@@ -226,12 +227,11 @@ public class MainActivity extends AppCompatActivity {
         return  timeString;
     }
 
+    // Attempts to fetch initial time from sp, else returns CFG.INITIAL_TIMER
     private long getInitialTime() {
 
-        // Attempting to fetch initial time from sp, else return CFG.INITIAL_TIMER
         SharedPreferences sp = this.getSharedPreferences(Config.SP_KEY, Context.MODE_PRIVATE);
         long result = sp.getLong(Config.SP_INIT_TIME_KEY, Config.INITIAL_TIMER);
-
         return result;
     }
 
@@ -277,19 +277,21 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (isRunning) {
                     stopTimer();
-                    btn_start_stop.setBackgroundResource(R.drawable.ic_play_button);
+                    btn_start_stop.setBackgroundResource(R.drawable.ic_play_circle);
                 }
                 else {
                     startTimer();
-                    btn_start_stop.setBackgroundResource(R.drawable.ic_video_pause);
+                    btn_start_stop.setBackgroundResource(R.drawable.ic_pause_circle);
                 }
             }
         });
         btn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                resetTimer();
-                btn_start_stop.setBackgroundResource(R.drawable.ic_play_button);
+                if (!isRunning){
+                    resetTimer();
+                    btn_start_stop.setBackgroundResource(R.drawable.ic_play_circle);
+                }
             }
         });
         btn_plus.setOnClickListener(new View.OnClickListener() {
