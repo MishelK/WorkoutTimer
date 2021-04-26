@@ -3,16 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/grey">
 
     <TextView
         android:id="@+id/notif_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Timer Running"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="20dp"
         android:layout_gravity="center_vertical"
-        android:textColor="@color/white"/>
+        android:textColor="@color/rzr_green"
+        android:textSize="14sp"
+        />
 
     <TextView
         android:id="@+id/notif_time"
@@ -21,6 +23,6 @@
         android:text="00:00"
         android:layout_marginStart="10dp"
         android:layout_gravity="center_vertical"
-        android:textSize="18sp"
-        android:textColor="@color/white"/>
+        android:textSize="16sp"
+        android:textColor="@color/rzr_green"/>
 </LinearLayout>
