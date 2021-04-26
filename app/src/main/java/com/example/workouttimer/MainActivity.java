@@ -63,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
                 if (timeLeft == 0) {
                     isRunning = false;
                     isFinished = true;
+
+                    // Setting ui changes
+                    btn_reset.setBackgroundResource(R.drawable.ic_reset_circle);
+                    btn_reset.setClickable(true);
+                    btn_start_stop.setBackgroundResource(R.drawable.ic_pause_circle_grey);
+                    btn_start_stop.setClickable(false);
                 }
             }
         };
@@ -278,10 +284,20 @@ public class MainActivity extends AppCompatActivity {
                 if (isRunning) {
                     stopTimer();
                     btn_start_stop.setBackgroundResource(R.drawable.ic_play_circle);
+                    // Setting ui changes
+                    btn_reset.setBackgroundResource(R.drawable.ic_reset_circle);
+                    btn_reset.setClickable(true);
                 }
                 else {
                     startTimer();
                     btn_start_stop.setBackgroundResource(R.drawable.ic_pause_circle);
+                    // Setting ui changes
+                    btn_reset.setBackgroundResource(R.drawable.ic_reset_circle_grey);
+                    btn_reset.setClickable(false);
+                    btn_plus.setBackgroundResource(R.drawable.ic_circle_plus_grey);
+                    btn_plus.setClickable(false);
+                    btn_minus.setBackgroundResource(R.drawable.ic_circle_minus_grey);
+                    btn_minus.setClickable(false);
                 }
             }
         });
@@ -290,7 +306,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!isRunning){
                     resetTimer();
+                    // Setting ui changes
                     btn_start_stop.setBackgroundResource(R.drawable.ic_play_circle);
+                    btn_start_stop.setClickable(true);
+                    btn_plus.setBackgroundResource(R.drawable.ic_circle_plus);
+                    btn_plus.setClickable(true);
+                    btn_minus.setBackgroundResource(R.drawable.ic_circle_minus);
+                    btn_minus.setClickable(true);
                 }
             }
         });

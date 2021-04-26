@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.WorkoutTimer" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#FFFFFF</item>
+        <item name="colorPrimary">@color/grey</item>
         <item name="colorPrimaryVariant">#868587</item>
         <item name="colorOnPrimary">#FF000000</item>
         <!-- Secondary brand color. -->
