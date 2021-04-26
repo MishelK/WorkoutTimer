@@ -177,7 +177,7 @@ public class TimerService extends Service {
         // Starting Notification
         builder.setCustomContentView(remoteViews);
         builder.setContentIntent(pendingIntent);
-        builder.setSmallIcon(R.drawable.ic_play_button);
+        builder.setSmallIcon(R.drawable.ic_hourglass_circle);
         builder.setOngoing(true);
         //startForeground(NOTIF_ID, builder.build());
         manager.notify(NOTIF_ID, builder.build());
